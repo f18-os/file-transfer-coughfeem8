@@ -1,0 +1,40 @@
+#+TITLE: File trasfer Lab
+#+AUTHOR: Sergio Yanez
+#+DATE:  10/01/2018
+#+OPTIONS: toc:nil
+#+STARTUP: inlineimages
+* Description
+  The lab include the code for a single server and user to interact with each other by sending and recibin  generic files 
+* Usage
+ you must run the code as:
+#+BEGIN_SRC bash
+ python fileServer.py
+#+END_SRC 
+ followed by :
+#+BEGIN_SRC bash
+ python file client.py
+#+END_SRC
+ in a diffent bash prompt to trigger the interaction.the user can either enter /put\/get/ <file-name>.
+* Files
+** /server
+   - folder simulating the data stored inside a server.Used for testing purposes.
+*** igigS.txt
+    - text file that contains a gig(supposely) of numbers
+*** servertest.txt
+    - file used to  data to the client by the server.
+** fileClient.py
+   - file which contains the code of the client
+** fileServer.py
+   - file which contains the code for the server
+** filemaker.py
+   - program that makes two files full of numbers  one 1 megabite 
+   and 1 gigbyte 
+** imegU.txt
+   - file containgin 1 meg of random numbers
+
+* TODO Thrusday
+  - [ ]implement multiple clients.
+    -  maybe useing a list of clients and iterating though them.
+  - [ ]using fork to run simultanious porcesses.
+  - [ ]all edge case with no files, existing files and empty commands.
+  
