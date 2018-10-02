@@ -14,7 +14,7 @@
 #+BEGIN_SRC bash
  python file client.py
 #+END_SRC
- in a diffent bash prompt to trigger the interaction.the user can either enter /put\/get/ <file-name>.
+ in a diffent bash prompt to trigger the interaction.the user can either enter /put/get/ <file-name>.
 * Files
 ** /server
    - folder simulating the data stored inside a server.Used for testing purposes.
@@ -27,7 +27,7 @@
 ** fileServer.py
    - file which contains the code for the server
 ** filemaker.py
-   - program that makes two files full of numbers  one 1 megabite 
+   - program that makes two files full of numbers  one 1 megabyte 
    and 1 gigbyte 
 ** imegU.txt
    - file containgin 1 meg of random numbers
