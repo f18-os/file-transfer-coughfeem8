@@ -1,4 +1,4 @@
-#+TITLE: File trasfer Lab
+#+TITLE: File Trasfer Lab
 #+AUTHOR: Sergio Yanez
 #+DATE:  10/01/2018
 #+OPTIONS: toc:nil

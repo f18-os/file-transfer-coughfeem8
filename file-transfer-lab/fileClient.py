@@ -60,12 +60,18 @@ if s is None:
     sys.exit(1)
 
 #====================  methods =====================================
+'''
+prints a small animaiton to chek that the program is still running
+'''
 def printAnimation():
     sys.stdout.write('0')
     sys.stdout.write('\b')
     sys.stdout.write('|')
     sys.stdout.write('\b')
 
+''''
+implementation of how to send a file to a server
+'''''
 def sendFile(filename):
     with open (f,'rb') as sfile:
         sys.stdout.write('sending data.')
@@ -77,7 +83,10 @@ def sendFile(filename):
         print()
     sys.stdout.write("data sent. ")
     sfile.close()     
-    
+
+''''
+implementation of how to get a file from a server 
+'''''    
 def getFile(filename):
     with open(filename, 'wb') as rfile:
         sys.stdout.write("recieving data.")
@@ -92,8 +101,7 @@ def getFile(filename):
 
 #====================== file  trasfer ===============================
 
-request = ""
-while  not request == 'exit':
+while True:
     request = input()
     s.send(bytes(request,'utf-8'))
 
@@ -108,15 +116,19 @@ while  not request == 'exit':
         #serverPort = 50001
         print ('connection stablished to port: {0}'.format(serverPort))
     elif command == 'put':
-        if not os.path.isfile(f):
-            print('file: {0} doesn\'t exits.'.format(f))
+        if (not os.path.isfile(f)) or  os.path.getsize(f) == 0:
+            print('file: {0} doesn\'t exits or is too small.'.format(f))
             continue
         sendFile(f)  
     elif command == 'get':
         if os.path.isfile(f):
-            print('you already have that file.')
+            print('you already have {0}.'.format(f))
             continue
         getFile(f)
+    #end command disconecting
+    elif request == 'exit':
+        print('disconecting')
+        sys.exit(1)        
     else: #zero size command
         print('that\'s  not a good format')
 

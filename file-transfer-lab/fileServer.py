@@ -31,23 +31,30 @@ def printAnimation():
     sys.stdout.write('|')
     sys.stdout.write('\b')
 
-def sendFile(filename, socket):
+''''
+implementation of how to send a file to a client 
+'''''
+def sendFile(filename, so):
     with open ('server/'+filename,'rb') as sfile:
         sys.stdout.write('sending data.')
         while True:
             line = sfile.read(100)
-            socket.send(line)
+            so.send(line)
             printAnimation()
             if not line: break              
         print()
     sys.stdout.write("data sent. ")
     sfile.close()     
-    
-def getFile(filename,socket):
+
+
+''''
+implementation of how to recieve a file from  a client
+'''''    
+def getFile(filename,so):
     with open('server/'+filename, 'wb') as rfile:
         sys.stdout.write("recieving data.")
         while True:
-            data = socket.recv(100)
+            data = so.recv(100)
             if not data: break
             rfile.write(data)
             printAnimation()
@@ -59,19 +66,28 @@ def getFile(filename,socket):
 while True:
     sock, addr = lsock.accept()
     
-    print("connection rec'd from", addr)
-    request = sock.recv(100)
-    request = request.decode('utf-8')
-    print(request)
-    command , f = re.split(' ', request)
-    #server sends a file
-    if command == 'get':
-        sendFile(f,sock)
-    #server  recieves a file    
-    elif command == 'put':
-        getFile(f,sock)
-    else:
-        print('wrong format, buddy. ')
-        continue
+    if not os.fork():
+        print("connection rec'd from", addr)
+        request = sock.recv(100)
+        request = request.decode('utf-8')
+        print(request)
+        command , f = re.split(' ', request)
 
-    
+        #server sends a file
+        if command == 'get':
+            if (not os.path.isfile(f)) or os.path.getsize(f) == 0 :
+                print('file: {0} doesn\'t exits or is too small.'.format(f))
+                continue
+            sendFile(f,sock)
+
+        #server  recieves a file    
+        elif command == 'put':
+            if os.path.isfile(f):
+                 print('you already have {0}.'.format(f))
+                 continue
+            getFile(f,sock)
+        else:
+            print('wrong format, buddy. ')
+            continue
+
+
