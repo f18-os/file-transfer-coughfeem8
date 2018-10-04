@@ -67,11 +67,14 @@ while True:
     sock, addr = lsock.accept()
     
     if not os.fork():
-        print("connection rec'd from", addr)
+        print("connection from child rec'd from", addr)
         request = sock.recv(100)
         request = request.decode('utf-8')
         print(request)
-        command , f = re.split(' ', request)
+        #get the client input parsed
+        command =  re.split(' ', request)
+        f= command[1]
+        command = command[0]
 
         #server sends a file
         if command == 'get':

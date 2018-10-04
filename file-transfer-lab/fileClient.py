@@ -73,7 +73,7 @@ def printAnimation():
 implementation of how to send a file to a server
 '''''
 def sendFile(filename):
-    with open (f,'rb') as sfile:
+    with open (filename,'rb') as sfile:
         sys.stdout.write('sending data.')
         while True:
             line = sfile.read(100)
@@ -106,14 +106,18 @@ while True:
     s.send(bytes(request,'utf-8'))
 
     #check if client uses direct conection to the server
+    command =  re.split(' ', request)
+    f= command[1]
     try:
-        command, f =  re.split(' ', request)
-    except Exception:
-        command, f, direct = re.split(' ', request)
+        direct = command[2]
+    except:
+        direct = False
+    command = command[0]
 
+    
     #connect to the proxy automatically
     if direct:
-        #serverPort = 50001
+        serverPort = 50001
         print ('connection stablished to port: {0}'.format(serverPort))
     elif command == 'put':
         if (not os.path.isfile(f)) or  os.path.getsize(f) == 0:
