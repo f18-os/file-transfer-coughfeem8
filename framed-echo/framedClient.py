@@ -1,10 +1,9 @@
 #! /usr/bin/env python3
 
 # Echo client program
-import socket, sys, re
-
+import sys
 sys.path.append("../lib")       # for params
-import params
+import params,re, socket
 
 from framedSock import framedSend, framedReceive
 

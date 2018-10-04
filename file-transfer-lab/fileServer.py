@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
-import sys, re, socket
+import sys
 sys.path.append("../lib")       # for params
-import params
+import params, re, socket, os
 
 switchesVarDefaults = (
     (('-l', '--listenPort') ,'listenPort', 50001),
@@ -23,44 +23,55 @@ lsock.bind(bindAddr)
 lsock.listen(5)
 print("listening on:", bindAddr)
 
-sock, addr = lsock.accept()
-print("connection rec'd from", addr)
+
+#====================  methods =====================================
+def printAnimation():
+    sys.stdout.write('0')
+    sys.stdout.write('\b')
+    sys.stdout.write('|')
+    sys.stdout.write('\b')
+
+def sendFile(filename, socket):
+    with open ('server/'+filename,'rb') as sfile:
+        sys.stdout.write('sending data.')
+        while True:
+            line = sfile.read(100)
+            socket.send(line)
+            printAnimation()
+            if not line: break              
+        print()
+    sys.stdout.write("data sent. ")
+    sfile.close()     
+    
+def getFile(filename,socket):
+    with open('server/'+filename, 'wb') as rfile:
+        sys.stdout.write("recieving data.")
+        while True:
+            data = socket.recv(100)
+            if not data: break
+            rfile.write(data)
+            printAnimation()
+        print()
+    rfile.close()
+    sys.stdout.write("data recieved")
 
 # ================== file transfer ==================================
-request = sock.recv(100)
-request = request.decode('utf-8')
-print(request)
-command , f = re.split(' ', request)
-#server sends a file
-if command == 'get':
-    with open('server/'+f , 'rb') as send_file:
-          sys.stdout.write("sending data.")
-          while True:
-              data = send_file.read(100)
-              if not data:  break
-              sock.send(data)
-              sys.stdout.write('.')
-              sys.stdout.write('\b')
-          print()
-    sys.stdout.write("data sent")
-    send_file.close()
-#server  recieves a file    
-elif command == 'put':
-    with open('server/'+f, 'wb') as rec_file:
-        sys.stdout.write('recviving data.')
-        while True:
-            data = sock.recv(100)
-            if not data:
-                print('ERROR WHILE RECIEVING')
-                break
-            rec_file.write(data)
-            sys.stdout.write('.')
-            sys.stdout.write('\b')
-        print()
-    sys.stdout.write("data recieved")
-    rec_file.close()
-else:
-    print('wrong format, buddy. ')
-    sys.exit(1)
+while True:
+    sock, addr = lsock.accept()
+    
+    print("connection rec'd from", addr)
+    request = sock.recv(100)
+    request = request.decode('utf-8')
+    print(request)
+    command , f = re.split(' ', request)
+    #server sends a file
+    if command == 'get':
+        sendFile(f,sock)
+    #server  recieves a file    
+    elif command == 'put':
+        getFile(f,sock)
+    else:
+        print('wrong format, buddy. ')
+        continue
 
     

@@ -7,7 +7,6 @@ import time
 import random
 
 import re
-
 sys.path.append("../lib")       # for params
 import params
 

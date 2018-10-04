@@ -10,11 +10,15 @@
 #+BEGIN_SRC bash
  python fileServer.py
 #+END_SRC 
+you must run start the proxy with:
+#+BEGIN_SRC bash
+ python ../stammer-proxy/stammerProxy.py
+#+END_SRC 
  followed by :
 #+BEGIN_SRC bash
  python file client.py
 #+END_SRC
- in a diffent bash prompt to trigger the interaction.the user can either enter /put/get/ <file-name>.
+ in a diffent bash prompt to trigger the interaction.the user can either enter /put/get/ <file-name> and a optional 0 or 1 to determine if the file is connected directly ot the server..
 * Files
 ** /server
    - folder simulating the data stored inside a server.Used for testing purposes.
@@ -32,9 +36,14 @@
 ** imegU.txt
    - file containgin 1 meg of random numbers
 
-* TODO Thrusday
-  - [ ]implement multiple clients.
-    -  maybe useing a list of clients and iterating though them.
-  - [ ]using fork to run simultanious porcesses.
-  - [ ]all edge case with no files, existing files and empty commands.
-  
+* DONE Thrusday [3/3]
+  - [X] implement multiple clients.
+    - maybe useing a list of clients and iterating though them.
+  - [X] using fork to run simultanious porcesses.
+  - [X] all edge case with no files, existing files and empty commands.
+* works cited
+  the hard parts of a lab were found on a video about how to send and recieve data.
+ - how to recieve a file from a socket
+    [[https://www.youtube.com/watch?v=1VaBy6ZSIUM][Python How To Send File From Client To Server And Vice Versa]]
+ - how to send data from a socket
+   [[https://www.youtube.com/watch?v=HrDyqtyT2yk][Part Two Tutorial On How To Send and Recieve File From Client To Server Or Vice Versa]]
