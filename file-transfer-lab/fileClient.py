@@ -4,6 +4,9 @@
 import socket, sys, re, os
 
 sys.path.append("../lib")       # for params
+sys.path.append('../framed-echo')
+from fileSock import sendFile, getFile
+from framedSock import framedSend, framedReceive  # for commands
 import params
 
 
@@ -13,7 +16,6 @@ switchesVarDefaults = (
     (('-d', '--debug'), "debug", False), # boolean (set if present)
     (('-?', '--usage'), "usage", False), # boolean (set if present)
     )
-
 
 progname = "framedClient"
 paramMap = params.parseParams(switchesVarDefaults)
@@ -32,6 +34,19 @@ try:
 except:
     print("Can't parse server:port from '%s'" % server)
     sys.exit(1)
+
+#check for the type of conenciton to the server
+while True:
+    conn_type = raw_input('what to connect directy to the server? [Y/N]\n')
+
+    # connect coorecty depending on type
+    if conn_type.upper() == 'Y':
+        serverPort = 50001  #server
+        break
+    elif conn_type.upper() == 'N': 
+        break     #no need to re set the same value
+    else:
+        print ('WRONG INPUT. TRY AGAIN')
 
 s = None
 for res in socket.getaddrinfo(serverHost, serverPort
@@ -54,85 +69,39 @@ for res in socket.getaddrinfo(serverHost, serverPort
         s = None
         continue
     break
-
 if s is None:
     print('could not open socket')
     sys.exit(1)
 
-#====================  methods =====================================
-'''
-prints a small animaiton to chek that the program is still running
-'''
-def printAnimation():
-    sys.stdout.write('0')
-    sys.stdout.write('\b')
-    sys.stdout.write('|')
-    sys.stdout.write('\b')
-
-''''
-implementation of how to send a file to a server
-'''''
-def sendFile(filename):
-    with open (filename,'rb') as sfile:
-        sys.stdout.write('sending data.')
-        while True:
-            line = sfile.read(100)
-            s.send(line)
-            printAnimation()
-            if not line: break              
-        print()
-    sys.stdout.write("data sent. ")
-    sfile.close()     
-
-''''
-implementation of how to get a file from a server 
-'''''    
-def getFile(filename):
-    with open(filename, 'wb') as rfile:
-        sys.stdout.write("recieving data.")
-        while True:
-            data = s.recv(100)
-            if not data: break
-            rfile.write(data)
-            printAnimation()
-        print()
-    rfile.close()
-    sys.stdout.write("data recieved")
-
 #====================== file  trasfer ===============================
-
+print ('connection stablished to port: {}'.format(serverPort))
 while True:
-    request = input()
-    s.send(bytes(request,'utf-8'))
+    request = raw_input()
+    #end command disconecting
+    if request == 'exit':
+        print('disconecting')
+        s.close()
+        break
+    else:
+        framedSend(s,request,debug)
 
-    #check if client uses direct conection to the server
-    command =  re.split(' ', request)
-    f= command[1]
+    #check if client uses direct conection to  the server
+    data =  re.split(' ', request)
     try:
-        direct = command[2]
+        command , f = data
+        
     except:
-        direct = False
-    command = command[0]
-
-    
-    #connect to the proxy automatically
-    if direct:
-        serverPort = 50001
-        print ('connection stablished to port: {0}'.format(serverPort))
-    elif command == 'put':
+        print ('WRONG NUMBER OF COMMANDS')
+        continue
+    if command == 'put':
         if (not os.path.isfile(f)) or  os.path.getsize(f) == 0:
-            print('file: {0} doesn\'t exits or is too small.'.format(f))
-            continue
-        sendFile(f)  
+            print('file: {} doesn\'t exits or is too small.'.format(f))
+        else:
+            sendFile(f,s)  
     elif command == 'get':
         if os.path.isfile(f):
-            print('you already have {0}.'.format(f))
-            continue
-        getFile(f)
-    #end command disconecting
-    elif request == 'exit':
-        print('disconecting')
-        sys.exit(1)        
+            print('you already have {}.'.format(f))
+        else:
+            getFile(f,s)
     else: #zero size command
         print('that\'s  not a good format')
-

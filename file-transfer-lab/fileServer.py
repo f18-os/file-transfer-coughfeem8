@@ -1,7 +1,10 @@
 #! /usr/bin/env python3
 import sys
 sys.path.append("../lib")       # for params
+sys.path.append('../framed-echo')
 import params, re, socket, os
+from fileSock import sendFile, getFile #for files 
+from framedSock import framedSend, framedReceive  # for commands
 
 switchesVarDefaults = (
     (('-l', '--listenPort') ,'listenPort', 50001),
@@ -17,80 +20,49 @@ debug, listenPort = paramMap['debug'], paramMap['listenPort']
 if paramMap['usage']:
     params.usage()
 
-lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # listener socket
+lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # listener
 bindAddr = ("127.0.0.1", listenPort)
 lsock.bind(bindAddr)
 lsock.listen(5)
 print("listening on:", bindAddr)
 
 
-#====================  methods =====================================
-def printAnimation():
-    sys.stdout.write('0')
-    sys.stdout.write('\b')
-    sys.stdout.write('|')
-    sys.stdout.write('\b')
-
-''''
-implementation of how to send a file to a client 
-'''''
-def sendFile(filename, so):
-    with open ('server/'+filename,'rb') as sfile:
-        sys.stdout.write('sending data.')
-        while True:
-            line = sfile.read(100)
-            so.send(line)
-            printAnimation()
-            if not line: break              
-        print()
-    sys.stdout.write("data sent. ")
-    sfile.close()     
-
-
-''''
-implementation of how to recieve a file from  a client
-'''''    
-def getFile(filename,so):
-    with open('server/'+filename, 'wb') as rfile:
-        sys.stdout.write("recieving data.")
-        while True:
-            data = so.recv(100)
-            if not data: break
-            rfile.write(data)
-            printAnimation()
-        print()
-    rfile.close()
-    sys.stdout.write("data recieved")
-
 # ================== file transfer ==================================
 while True:
     sock, addr = lsock.accept()
     
     if not os.fork():
-        print("connection from child rec'd from", addr)
-        request = sock.recv(100)
-        request = request.decode('utf-8')
-        print(request)
-        #get the client input parsed
-        command =  re.split(' ', request)
-        f= command[1]
-        command = command[0]
+        print("CONNECTION FROM CHILD REC'D FROM ", addr)
+        while True: #just keep connected to the client until it exits 
+            request = framedReceive(sock,debug)
+            if request:
+                request = request.decode('utf-8')
+                request = request.rstrip()
+            else:
+                print( 'SERVER DISCONNECTED FROM {}.'.format(addr))
+                break
 
-        #server sends a file
-        if command == 'get':
-            if (not os.path.isfile(f)) or os.path.getsize(f) == 0 :
-                print('file: {0} doesn\'t exits or is too small.'.format(f))
+            #get the client input parsed
+            data =  re.split(' ', request)
+            try:
+                command, f = data
+            except:
+                print ('WRONG FORMAT RECIEVED')
                 continue
-            sendFile(f,sock)
 
-        #server  recieves a file    
-        elif command == 'put':
-            if os.path.isfile(f):
-                 print('you already have {0}.'.format(f))
-                 continue
-            getFile(f,sock)
-        else:
-            print('wrong format, buddy. ')
-            continue
-
-
+            #server sends a file
+            if command == 'get':
+                if (not os.path.isfile('server/'+f)) or os.stat('server/'+f) <= 0:
+                    print('FILE: <{}> NOT IN SERVER/TOO SMALLl.'
+                          .format(f))
+                    continue
+                sendFile(f,sock,'server')
+            #server  recieves a file    
+            elif command == 'put':
+                if os.path.isfile('server/'+f):
+                    print('<{}> ALREADY IN SERVER.'.format(f))
+                    continue
+                getFile(f,sock,'server')
+            else:   
+                print('WRONG INSTRUCTON RECIEVED.')
+                continue

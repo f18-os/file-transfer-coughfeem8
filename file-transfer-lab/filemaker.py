@@ -7,4 +7,4 @@ def fileMaker(name,size):
    new_file.close()
 
 fileMaker('1megU',1000000)
-fileMaker('server/1gigS',10000000000)
+fileMaker('server/1gigS',10000000)
