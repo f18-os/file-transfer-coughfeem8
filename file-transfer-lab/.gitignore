@@ -1,0 +1,8 @@
+server/*
+*.txt
+*.pyc
+__pycache__
+../framed-echo/__pycache__/
+../framed-echo/*.pyc
+../lib/__pycache__/
+../lib/*.pyc
